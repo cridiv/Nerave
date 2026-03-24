@@ -16,6 +16,45 @@ const payLockAbi = [
     type: 'constructor',
   },
   {
+    inputs: [
+      { internalType: 'uint256', name: 'milestoneId', type: 'uint256' }
+    ],
+    name: 'confirmMilestone',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [],
+    name: 'getAgreementState',
+    outputs: [
+      {
+        components: [
+          { internalType: 'address', name: 'client', type: 'address' },
+          { internalType: 'address', name: 'contractor', type: 'address' },
+          { internalType: 'uint256', name: 'totalAmount', type: 'uint256' }
+        ],
+        internalType: 'struct PayLockAgreement.Agreement',
+        name: '',
+        type: 'tuple'
+      },
+      {
+        components: [
+          { internalType: 'string', name: 'title', type: 'string' },
+          { internalType: 'uint256', name: 'amount', type: 'uint256' },
+          { internalType: 'bool', name: 'clientConfirmed', type: 'bool' },
+          { internalType: 'bool', name: 'contractorConfirmed', type: 'bool' },
+          { internalType: 'bool', name: 'disbursed', type: 'bool' }
+        ],
+        internalType: 'struct PayLockAgreement.Milestone[]',
+        name: '',
+        type: 'tuple[]'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
     anonymous: false,
     inputs: [
       {
@@ -48,13 +87,11 @@ export class BlockchainService implements OnModuleInit {
   private walletClient!: ReturnType<typeof createWalletClient>;
   private account!: ReturnType<typeof privateKeyToAccount>;
 
-  // Inject ConfigService to access .env variables
   constructor(private configService: ConfigService) {}
 
   onModuleInit() {
     this.logger.log('Initializing BlockchainService on Sepolia');
 
-    // Prefer WALLET_PRIVATE_KEY but keep backward compatibility with PRIVATE_KEY.
     const privateKey =
       this.configService.get<string>('WALLET_PRIVATE_KEY') ??
       this.configService.get<string>('PRIVATE_KEY');
@@ -67,17 +104,15 @@ export class BlockchainService implements OnModuleInit {
       return;
     }
 
-    // 2. Initialize Account
     this.account = privateKeyToAccount(privateKey as `0x${string}`);
 
-    // 3. Setup Sepolia (Testnet) Clients
     this.publicClient = createPublicClient({
-      chain: sepolia, // Sepolia testnet
-      transport: http(this.configService.get<string>('SEPOLIA_RPC_URL') || undefined), // Uses configured RPC URL when available.
+      chain: sepolia,
+      transport: http(this.configService.get<string>('SEPOLIA_RPC_URL') || undefined),
     });
 
     this.walletClient = createWalletClient({
-      account: this.account, // Bind the account to the WalletClient
+      account: this.account,
       chain: sepolia,
       transport: http(this.configService.get<string>('SEPOLIA_RPC_URL') || undefined),
     });
@@ -89,41 +124,58 @@ export class BlockchainService implements OnModuleInit {
     totalAmount: bigint,
   ): Promise<string> {
     if (this.isMockMode) {
-      this.logger.warn(
-        'Mock deployment used; returning placeholder contract address for local testing.',
-      );
+      this.logger.warn('Mock deployment used; returning placeholder contract address for local testing.');
       return '0x0000000000000000000000000000000000000000';
     }
 
-    this.logger.log(
-      `Deploying agreement for Client: ${clientAddr}, Contractor: ${contractorAddr}`,
-    );
+    this.logger.log(`Deploying agreement for Client: ${clientAddr}, Contractor: ${contractorAddr}`);
 
     try {
-      // 4. Pass the account during the deployContract call
       const hash = await this.walletClient.deployContract({
         abi: payLockAbi,
         bytecode: payLockBytecode as `0x${string}`,
         args: [clientAddr as Address, contractorAddr as Address, totalAmount],
-        account: this.account, // Include account here to resolve the TypeScript/Viem error
-        chain: sepolia, // Include chain parameter here
+        account: this.account,
+        chain: sepolia,
       });
 
       this.logger.log(`Deployment tx hash: ${hash}`);
 
-      const receipt = await this.publicClient.waitForTransactionReceipt({
-        hash,
-      });
+      const receipt = await this.publicClient.waitForTransactionReceipt({ hash });
 
       if (!receipt.contractAddress) {
         throw new Error('Contract deployment completed without contractAddress');
       }
 
       this.logger.log(`Contract deployed at: ${receipt.contractAddress}`);
-
       return receipt.contractAddress;
     } catch (error) {
       this.logger.error('Error deploying agreement', error);
+      throw error;
+    }
+  }
+
+  async getAgreementState(contractAddress: string) {
+    if (this.isMockMode) {
+      return {
+        agreement: { client: '0xmock', contractor: '0xmock', totalAmount: '0' },
+        milestones: []
+      };
+    }
+    
+    try {
+      const result = await this.publicClient.readContract({
+        address: contractAddress as Address,
+        abi: payLockAbi,
+        functionName: 'getAgreementState'
+      });
+      // the ABI returns two values: Agreement tuple, Milestones array
+      return {
+        agreement: result[0],
+        milestones: result[1]
+      };
+    } catch (error) {
+      this.logger.error('Error getting agreement state', error);
       throw error;
     }
   }
@@ -134,16 +186,29 @@ export class BlockchainService implements OnModuleInit {
     by: 'CLIENT' | 'CONTRACTOR',
   ) {
     if (this.isMockMode) {
-      this.logger.log(
-        `[MOCK] confirmMilestone contract=${contractAddress} milestone=${milestoneIndex} by=${by}`,
-      );
+      this.logger.log(`[MOCK] confirmMilestone contract=${contractAddress} milestone=${milestoneIndex} by=${by}`);
       return;
     }
 
-    this.logger.log(
-      `confirmMilestone called for ${contractAddress} milestone ${milestoneIndex} by ${by}`,
-    );
-    // TODO: call contract method when ABI/write path is finalized.
+    this.logger.log(`confirmMilestone called for ${contractAddress} milestone ${milestoneIndex} by ${by}`);
+    try {
+      // Execute the on-chain write
+      const hash = await this.walletClient.writeContract({
+        address: contractAddress as Address,
+        abi: payLockAbi,
+        functionName: 'confirmMilestone',
+        args: [BigInt(milestoneIndex)],
+        chain: sepolia,
+        account: this.account
+      });
+
+      this.logger.log(`confirmMilestone tx hash: ${hash}`);
+      await this.publicClient.waitForTransactionReceipt({ hash });
+      this.logger.log(`confirmMilestone executed successfully`);
+    } catch (error) {
+      this.logger.error('Error confirming milestone', error);
+      throw error;
+    }
   }
 
   async listenToEvents(
@@ -151,15 +216,11 @@ export class BlockchainService implements OnModuleInit {
     onMilestoneApproved?: (milestoneId: string, amount: string) => Promise<void> | void,
   ) {
     if (this.isMockMode) {
-      this.logger.log(
-        `[MOCK] listenToEvents registered for ${contractAddress} (no chain subscription in mock mode)`,
-      );
+      this.logger.log(`[MOCK] listenToEvents registered for ${contractAddress} (no chain subscription in mock mode)`);
       return;
     }
 
-    this.logger.log(
-      `Listening for MilestoneApproved events on ${contractAddress}`,
-    );
+    this.logger.log(`Listening for MilestoneApproved events on ${contractAddress}`);
 
     this.publicClient.watchContractEvent({
       address: contractAddress as Address,
@@ -167,18 +228,9 @@ export class BlockchainService implements OnModuleInit {
       eventName: 'MilestoneApproved',
       onLogs: (logs) => {
         logs.forEach((log) => {
-          this.logger.log(
-            `Event received! Milestone: ${log.args.milestoneId}, Amount: ${log.args.amount}`,
-          );
-          // Here we would call the Interswitch service/webhook to auto-disburse
-          this.handleAutoDisbursement(
-            log.args.milestoneId!.toString(),
-            log.args.amount!.toString(),
-          );
-          void onMilestoneApproved?.(
-            log.args.milestoneId!.toString(),
-            log.args.amount!.toString(),
-          );
+          this.logger.log(`Event received! Milestone: ${log.args.milestoneId}, Amount: ${log.args.amount}`);
+          this.handleAutoDisbursement(log.args.milestoneId!.toString(), log.args.amount!.toString());
+          void onMilestoneApproved?.(log.args.milestoneId!.toString(), log.args.amount!.toString());
         });
       },
       onError: (error) => {
@@ -188,9 +240,6 @@ export class BlockchainService implements OnModuleInit {
   }
 
   private handleAutoDisbursement(milestoneId: string, amount: string) {
-    this.logger.log(
-      ` [INTERSWITCH PIPELINE] Auto-disbursement triggered for Milestone ${milestoneId} - Amount: ${amount}`,
-    );
-    // Simulate API call to Interswitch mock...
+    this.logger.log(` [INTERSWITCH PIPELINE] Auto-disbursement triggered for Milestone ${milestoneId} - Amount: ${amount}`);
   }
 }
