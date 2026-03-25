@@ -16,13 +16,11 @@ const payLockAbi = [
     type: 'constructor',
   },
   {
-    inputs: [
-      { internalType: 'uint256', name: 'milestoneId', type: 'uint256' }
-    ],
+    inputs: [{ internalType: 'uint256', name: 'milestoneId', type: 'uint256' }],
     name: 'confirmMilestone',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     inputs: [],
@@ -32,11 +30,11 @@ const payLockAbi = [
         components: [
           { internalType: 'address', name: 'client', type: 'address' },
           { internalType: 'address', name: 'contractor', type: 'address' },
-          { internalType: 'uint256', name: 'totalAmount', type: 'uint256' }
+          { internalType: 'uint256', name: 'totalAmount', type: 'uint256' },
         ],
         internalType: 'struct PayLockAgreement.Agreement',
         name: '',
-        type: 'tuple'
+        type: 'tuple',
       },
       {
         components: [
@@ -44,15 +42,15 @@ const payLockAbi = [
           { internalType: 'uint256', name: 'amount', type: 'uint256' },
           { internalType: 'bool', name: 'clientConfirmed', type: 'bool' },
           { internalType: 'bool', name: 'contractorConfirmed', type: 'bool' },
-          { internalType: 'bool', name: 'disbursed', type: 'bool' }
+          { internalType: 'bool', name: 'disbursed', type: 'bool' },
         ],
         internalType: 'struct PayLockAgreement.Milestone[]',
         name: '',
-        type: 'tuple[]'
-      }
+        type: 'tuple[]',
+      },
     ],
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     anonymous: false,
@@ -82,7 +80,6 @@ const payLockBytecode =
 @Injectable()
 export class BlockchainService implements OnModuleInit {
   private readonly logger = new Logger(BlockchainService.name);
-  private isMockMode = false;
   private publicClient!: ReturnType<typeof createPublicClient>;
   private walletClient!: ReturnType<typeof createWalletClient>;
   private account!: ReturnType<typeof privateKeyToAccount>;
@@ -97,24 +94,23 @@ export class BlockchainService implements OnModuleInit {
       this.configService.get<string>('PRIVATE_KEY');
 
     if (!privateKey) {
-      this.isMockMode = true;
-      this.logger.warn(
-        'No wallet private key found. BlockchainService running in mock mode.',
+      this.logger.error(
+        'CRITICAL: No wallet private key found in environment variables.',
       );
-      return;
+      throw new Error('WALLET_PRIVATE_KEY or PRIVATE_KEY is required');
     }
 
     this.account = privateKeyToAccount(privateKey as `0x${string}`);
 
     this.publicClient = createPublicClient({
       chain: sepolia,
-      transport: http(this.configService.get<string>('SEPOLIA_RPC_URL') || undefined),
+      transport: http(this.configService.get<string>('RPC_URL') || undefined),
     });
 
     this.walletClient = createWalletClient({
       account: this.account,
       chain: sepolia,
-      transport: http(this.configService.get<string>('SEPOLIA_RPC_URL') || undefined),
+      transport: http(this.configService.get<string>('RPC_URL') || undefined),
     });
   }
 
@@ -123,12 +119,9 @@ export class BlockchainService implements OnModuleInit {
     contractorAddr: string,
     totalAmount: bigint,
   ): Promise<string> {
-    if (this.isMockMode) {
-      this.logger.warn('Mock deployment used; returning placeholder contract address for local testing.');
-      return '0x0000000000000000000000000000000000000000';
-    }
-
-    this.logger.log(`Deploying agreement for Client: ${clientAddr}, Contractor: ${contractorAddr}`);
+    this.logger.log(
+      `Deploying agreement for Client: ${clientAddr}, Contractor: ${contractorAddr}`,
+    );
 
     try {
       const hash = await this.walletClient.deployContract({
@@ -141,10 +134,14 @@ export class BlockchainService implements OnModuleInit {
 
       this.logger.log(`Deployment tx hash: ${hash}`);
 
-      const receipt = await this.publicClient.waitForTransactionReceipt({ hash });
+      const receipt = await this.publicClient.waitForTransactionReceipt({
+        hash,
+      });
 
       if (!receipt.contractAddress) {
-        throw new Error('Contract deployment completed without contractAddress');
+        throw new Error(
+          'Contract deployment completed without contractAddress',
+        );
       }
 
       this.logger.log(`Contract deployed at: ${receipt.contractAddress}`);
@@ -156,23 +153,16 @@ export class BlockchainService implements OnModuleInit {
   }
 
   async getAgreementState(contractAddress: string) {
-    if (this.isMockMode) {
-      return {
-        agreement: { client: '0xmock', contractor: '0xmock', totalAmount: '0' },
-        milestones: []
-      };
-    }
-    
     try {
       const result = await this.publicClient.readContract({
         address: contractAddress as Address,
         abi: payLockAbi,
-        functionName: 'getAgreementState'
+        functionName: 'getAgreementState',
       });
       // the ABI returns two values: Agreement tuple, Milestones array
       return {
         agreement: result[0],
-        milestones: result[1]
+        milestones: result[1],
       };
     } catch (error) {
       this.logger.error('Error getting agreement state', error);
@@ -185,12 +175,9 @@ export class BlockchainService implements OnModuleInit {
     milestoneIndex: number,
     by: 'CLIENT' | 'CONTRACTOR',
   ) {
-    if (this.isMockMode) {
-      this.logger.log(`[MOCK] confirmMilestone contract=${contractAddress} milestone=${milestoneIndex} by=${by}`);
-      return;
-    }
-
-    this.logger.log(`confirmMilestone called for ${contractAddress} milestone ${milestoneIndex} by ${by}`);
+    this.logger.log(
+      `confirmMilestone called for ${contractAddress} milestone ${milestoneIndex} by ${by}`,
+    );
     try {
       // Execute the on-chain write
       const hash = await this.walletClient.writeContract({
@@ -199,7 +186,7 @@ export class BlockchainService implements OnModuleInit {
         functionName: 'confirmMilestone',
         args: [BigInt(milestoneIndex)],
         chain: sepolia,
-        account: this.account
+        account: this.account,
       });
 
       this.logger.log(`confirmMilestone tx hash: ${hash}`);
@@ -213,14 +200,14 @@ export class BlockchainService implements OnModuleInit {
 
   async listenToEvents(
     contractAddress: string,
-    onMilestoneApproved?: (milestoneId: string, amount: string) => Promise<void> | void,
+    onMilestoneApproved?: (
+      milestoneId: string,
+      amount: string,
+    ) => Promise<void> | void,
   ) {
-    if (this.isMockMode) {
-      this.logger.log(`[MOCK] listenToEvents registered for ${contractAddress} (no chain subscription in mock mode)`);
-      return;
-    }
-
-    this.logger.log(`Listening for MilestoneApproved events on ${contractAddress}`);
+    this.logger.log(
+      `Listening for MilestoneApproved events on ${contractAddress}`,
+    );
 
     this.publicClient.watchContractEvent({
       address: contractAddress as Address,
@@ -228,9 +215,17 @@ export class BlockchainService implements OnModuleInit {
       eventName: 'MilestoneApproved',
       onLogs: (logs) => {
         logs.forEach((log) => {
-          this.logger.log(`Event received! Milestone: ${log.args.milestoneId}, Amount: ${log.args.amount}`);
-          this.handleAutoDisbursement(log.args.milestoneId!.toString(), log.args.amount!.toString());
-          void onMilestoneApproved?.(log.args.milestoneId!.toString(), log.args.amount!.toString());
+          this.logger.log(
+            `Event received! Milestone: ${log.args.milestoneId}, Amount: ${log.args.amount}`,
+          );
+          this.handleAutoDisbursement(
+            log.args.milestoneId!.toString(),
+            log.args.amount!.toString(),
+          );
+          void onMilestoneApproved?.(
+            log.args.milestoneId!.toString(),
+            log.args.amount!.toString(),
+          );
         });
       },
       onError: (error) => {
@@ -240,6 +235,8 @@ export class BlockchainService implements OnModuleInit {
   }
 
   private handleAutoDisbursement(milestoneId: string, amount: string) {
-    this.logger.log(` [INTERSWITCH PIPELINE] Auto-disbursement triggered for Milestone ${milestoneId} - Amount: ${amount}`);
+    this.logger.log(
+      ` [INTERSWITCH PIPELINE] Auto-disbursement triggered for Milestone ${milestoneId} - Amount: ${amount}`,
+    );
   }
 }
