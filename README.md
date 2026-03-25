@@ -101,7 +101,7 @@
 
 ### Morning (9am – 1pm): Brand Identity
 
-- [ ] Define Nerave brand — name means **nerve center of trust**
+- [x] Define Nerave brand — name means **nerve center of trust**
 - [ ] Choose color palette — suggest deep navy `#0A0F1E` + electric teal `#00D4AA` + white
 - [ ] Choose typography — one strong display font + one clean body font (avoid Inter/Roboto)
 - [ ] Design logo — wordmark or icon mark
