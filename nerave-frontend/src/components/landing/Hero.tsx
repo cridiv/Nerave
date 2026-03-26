@@ -101,60 +101,7 @@ export function Hero() {
         </div>
 
         <div className="hidden xl:block lg:col-span-6 relative h-[600px]">
-          <div className="absolute inset-0 flex items-center justify-center">
-            {/* Central Node */}
-            <div className="relative z-10 w-28 h-28 bg-white rounded-3xl shadow-[0_8px_30px_rgb(124,58,237,0.12)] border border-gray-100 flex items-center justify-center">
-              <div className="absolute inset-0 bg-[#7c3aed] rounded-3xl blur-2xl opacity-20 transform scale-150"></div>
-              <Sparkles className="w-10 h-10 text-[#7c3aed] relative z-20" />
-            </div>
-
-            {/* Orbiting Nodes */}
-            {[
-              { icon: Shield, angle: 0 },
-              { icon: Database, angle: 60 },
-              { icon: Server, angle: 120 },
-              { icon: GitBranch, angle: 180 },
-              { icon: Lock, angle: 240 },
-              { icon: Network, angle: 300 },
-            ].map((node, i) => {
-              const radius = 160;
-              const angleRad = (node.angle * Math.PI) / 180;
-              const x = Math.cos(angleRad) * radius;
-              const y = Math.sin(angleRad) * radius;
-
-              return (
-                <div
-                  key={i}
-                  className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                >
-                  {/* Dashed line connecting to center */}
-                  <div
-                    className="absolute border-b-2 border-dashed border-[#7c3aed]/20 w-[160px]"
-                    style={{
-                      transformOrigin: "left center",
-                      transform: `rotate(${node.angle}deg)`,
-                    }}
-                  />
-                  {/* Node */}
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{
-                      delay: 0.5 + i * 0.1,
-                      duration: 0.5,
-                      type: "spring",
-                    }}
-                    className="absolute w-12 h-12 rounded-full bg-[#7c3aed] shadow-[0_0_20px_rgba(124,58,237,0.4)] border-2 border-white flex items-center justify-center pointer-events-auto"
-                    style={{
-                      transform: `translate(${x}px, ${y}px)`,
-                    }}
-                  >
-                    <node.icon className="w-5 h-5 text-white" />
-                  </motion.div>
-                </div>
-              );
-            })}
-          </div>
+          <div className="absolute inset-0 flex items-center justify-center"></div>
         </div>
       </div>
     </section>
