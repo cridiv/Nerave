@@ -1,387 +1,465 @@
-# 🔐 Nerave — 3-Day Hackathon Build Plan
+<p align="center">
+  <img src="./nerave-banner.png" alt="Nerave Banner" width="100%" />
+</p>
 
-> Trustless milestone payments for African businesses. Smart contract logic. Interswitch rails. TypeScript SDK.
+<h1 align="center">🔐 Nerave</h1>
 
----
+<h3 align="center">
+  <em>The nerve center of trust — Trustless milestone payments for African businesses.</em>
+</h3>
 
-## 👥 Team Roles
+<p align="center">
+  <a href="https://npmjs.org/package/nerave-sdk"><img src="https://img.shields.io/npm/v/nerave-sdk.svg?style=flat-square&color=00D4AA" alt="npm version" /></a>
+  <img src="https://img.shields.io/badge/Solidity-0.8.20-363636?style=flat-square&logo=solidity" alt="Solidity" />
+  <img src="https://img.shields.io/badge/Sepolia-Deployed-6C63FF?style=flat-square&logo=ethereum" alt="Sepolia" />
+  <img src="https://img.shields.io/badge/Interswitch-Sandbox-F7941D?style=flat-square" alt="Interswitch" />
+  <img src="https://img.shields.io/badge/NestJS-Backend-E0234E?style=flat-square&logo=nestjs" alt="NestJS" />
+  <img src="https://img.shields.io/badge/TypeScript-SDK-3178C6?style=flat-square&logo=typescript" alt="TypeScript" />
+</p>
 
-| Role             | Responsibilities                                                         |
-| ---------------- | ------------------------------------------------------------------------ |
-| **Joshua** (You) | Smart contracts (Solidity + Foundry) + Blockchain module (NestJS + Viem) |
-| **Backend Dev**  | NestJS modules — Auth, Agreements, Payments, Webhooks + Prisma schema    |
-| **Designer**     | Brand identity, UI design, Next.js frontend implementation               |
-
----
-
-## ⚠️ Ground Rules
-
-- No code pushed to Git before **March 23rd (Kickoff day)**
-- Use **Sepolia testnet** throughout — no real money
-- Use **Interswitch sandbox** credentials throughout:
-  - Sandbox base URL: `https://sandbox.interswitchng.com`
-  - Transfer/Name Enquiry sandbox: `https://qa.interswitchng.com`
-  - Test Terminal ID: `3PBL0001`
-  - Test bank account: `0014261063` | bank code: `058` (GTB)
-- Every team member commits to the repo — judges check this
-- Deploy target: **Vercel** (frontend) + **Railway/Render** (NestJS backend)
+<p align="center">
+  <strong>Built for the Interswitch × Enyata Hackathon 2026</strong>
+</p>
 
 ---
 
-&nbsp;
+## 😤 The Problem — A Story Every Nigerian Business Knows
 
-# 📅 DAY 1 — March 23rd: Foundation
+Picture this: You're a small business owner in Lagos. You hire a freelance developer to build your website. You agree on ₦500,000 — half upfront, half on delivery.
 
-> Goal: Every layer has its skeleton running. Nothing pretty, everything connected.
+You send the first ₦250,000 via transfer. Then silence. The developer disappears. No refund. No recourse. You just lost ₦250,000.
 
-&nbsp;
+Now flip it: You're the developer. You deliver the website. The client says _"It's not exactly what I wanted"_ and refuses to pay the remaining ₦250,000. You just worked 3 weeks for free.
 
-## 🔷 Joshua — Smart Contracts + Blockchain Module
+**This happens thousands of times daily across Africa.** There's no trust layer between service providers and clients. Bank transfers are irreversible. Verbal agreements are unenforceable. And the courts? That's a 2-year journey nobody wants to take.
 
-### Morning (9am – 1pm): Smart Contract
-
-- [x] `forge init paylock-contracts` — scaffold Foundry project
-- [x] Write `PayLockAgreement.sol` — core contract with:
-  - Agreement struct (client, contractor, total amount)
-  - Milestone struct (title, amount, `clientConfirmed`, `contractorConfirmed`, `disbursed`)
-  - `confirmMilestone(uint milestoneId)` — callable by client or contractor
-  - `MilestoneApproved(uint milestoneId, uint amount)` event — fires when both confirm
-- [x] Write `PayLockAgreement.t.sol` — basic Foundry tests
-- [x] Run `forge test` — all tests passing
-
-### Afternoon (2pm – 7pm): NestJS Blockchain Module
-
-- [ ] Scaffold NestJS project — `nest new nerave-api`
-- [ ] Create `blockchain/` module
-- [ ] Integrate Viem — set up public + wallet client pointing at Sepolia
-- [ ] Write `deployAgreement()` service method — deploys a new contract instance per agreement using ABI + bytecode from `forge build`
-- [ ] Write `listenToEvents()` service method — listens for `MilestoneApproved` event on a contract address
-- [ ] Test deployment script manually with `cast` — confirm contract appears on Sepolia Etherscan
-
-### End of Day Checkpoint ✅
-
-- Smart contract deploys cleanly on Sepolia
-- NestJS can deploy a contract and read its events
-
-&nbsp;
-
-## 🔶 Backend Dev — Project Scaffold + Auth + Schema
-
-### Morning (9am – 1pm): Setup
-
-- [ ] Scaffold NestJS project (coordinate with Joshua — one shared repo)
-- [ ] Set up PostgreSQL on Supabase free tier
-- [ ] Configure Prisma — `prisma init`
-- [ ] Write full schema:
-  ```
-  User (id, email, businessName, apiKey, role)
-  Agreement (id, contractAddress, clientId, contractorId, totalAmount, status)
-  Milestone (id, agreementId, title, amount, clientConfirmed, contractorConfirmed, disbursed)
-  Transaction (id, agreementId, milestoneId, interswitchRef, type, status)
-  ```
-- [ ] Run `prisma migrate dev` — tables created
-
-### Afternoon (2pm – 7pm): Auth + API Keys
-
-- [ ] Build `auth/` module — email + password registration/login
-- [ ] JWT strategy — protect all routes
-- [ ] API key generation — every registered business gets a `pk_test_xxx` key
-- [ ] API key guard — SDK calls authenticate via this key
-- [ ] Test all auth endpoints with Postman
-
-### End of Day Checkpoint ✅
-
-- Database is live on Supabase
-- Auth endpoints working
-- API key guard protecting routes
-
-&nbsp;
-
-## 🎨 Designer — Brand + Design System
-
-### Morning (9am – 1pm): Brand Identity
-
-- [x] Define Nerave brand — name means **nerve center of trust**
-- [X] Choose color palette — suggest deep navy `#0A0F1E` + electric teal `#00D4AA` + white
-- [X] Choose typography — one strong display font + one clean body font (avoid Inter/Roboto)
-- [X] Design logo — wordmark or icon mark
-- [X] Create brand board in Figma — colors, fonts, spacing scale, button styles
-
-### Afternoon (2pm – 7pm): Core Screens (Figma)
-
-- [ ] Design landing page — hero, how it works (3 steps), SDK code snippet section, CTA
-- [ ] Design dashboard layout — sidebar navigation, main content area
-- [ ] Design agreement creation flow — step 1 (details) → step 2 (milestones) → step 3 (payment)
-- [ ] Design milestone card component — shows status, confirmation buttons, progress
-
-### End of Day Checkpoint ✅
-
-- Brand board complete
-- 4 core screens designed in Figma
-- Ready to hand off to frontend implementation tomorrow
+**Nerave fixes this.**
 
 ---
 
-&nbsp;
+## 🧠 What Nerave Does — In 3 Simple Layers
 
-# 📅 DAY 2 — March 24th: Core Features
+Think of Nerave like a **digital referee** that holds money safely until both sides agree the work is done.
 
-> Goal: The full agreement lifecycle works end to end. Create → Pay → Approve → Disburse.
+### Layer 1: The Agreement (What Everyone Sees)
+> A business owner and a service provider agree on a project. They split it into **milestones** — checkpoints with amounts attached. For example: _"Design: ₦150,000 → Development: ₦250,000 → Deployment: ₦100,000"_.
 
-&nbsp;
+### Layer 2: The Smart Contract (The Trust Engine)
+> When an agreement is created, Nerave deploys a **smart contract on Ethereum (Sepolia testnet)** — a piece of code that lives on the blockchain and **cannot be tampered with**. This contract holds the rules: _both the client AND the contractor must confirm a milestone is complete_ before any money moves.
 
-## 🔷 Joshua — Contract Events + SDK Package
-
-### Morning (9am – 1pm): Event Listener Integration
-
-- [ ] Wire `listenToEvents()` into the `agreements/` module
-- [ ] When `MilestoneApproved` fires → call `payments/` service to trigger Interswitch disbursement
-- [ ] Handle event listener lifecycle — start listening when agreement is created, clean up when complete
-- [ ] Write contract interaction methods:
-  - `confirmMilestone(contractAddress, milestoneId, signerRole)`
-  - `getAgreementState(contractAddress)` — read all milestone states
-
-### Afternoon (2pm – 7pm): SDK Package
-
-- [ ] `mkdir nerave-sdk && npm init`
-- [ ] Set up TypeScript — `tsconfig.json` with `declaration: true` and `outDir: dist`
-- [ ] Write SDK wrapper in TypeScript:
-  ```typescript
-  new Nerave({ apiKey: 'pk_test_xxx' })
-  nerave.agreements.create({ ... })
-  nerave.milestones.confirm({ ... })
-  nerave.agreements.getStatus({ ... })
-  ```
-- [ ] Add `baseUrl` config option — defaults to production API, overridable for local dev
-- [ ] Export proper TypeScript types for all inputs and responses
-- [ ] Point SDK at local NestJS API for now
-- [ ] Write `README.md` for the SDK — judges will read this
-- [ ] Test SDK methods manually
-
-### End of Day Checkpoint ✅
-
-- Milestone approval on-chain triggers disbursement automatically
-- SDK package installable and working locally
-- TypeScript types exported cleanly — ready for npm publish on Day 3
-
-&nbsp;
-
-## 🔶 Backend Dev — Agreements + Payments + Webhooks
-
-### Morning (9am – 1pm): Agreements Module
-
-- [ ] `POST /agreements` — creates agreement, tells blockchain module to deploy contract, saves `contractAddress` to DB
-- [ ] `GET /agreements/:id` — returns agreement + milestone states
-- [ ] `POST /agreements/:id/milestones/:milestoneId/confirm` — records confirmation in DB + calls contract
-- [ ] Validate that only the correct party (client or contractor) can confirm each milestone
-
-### Afternoon (2pm – 7pm): Payments + Webhooks
-
-**⚠️ Interswitch has TWO auth systems — know which endpoint uses which before writing any code.**
-
-- [ ] Build `interswitchOAuth()` helper — OAuth 2.0 for payment collection + disbursement:
-  ```
-  POST https://sandbox.interswitchng.com/passport/oauth/token
-  Header: Authorization: Basic Base64(CLIENT_ID:SECRET_KEY)
-  Body: grant_type=client_credentials
-  → returns access_token (valid for expires_in seconds, cache and reuse it)
-  ```
-- [ ] Build `interswitchLegacyAuth()` helper — legacy Interswitch Auth for account validation:
-  ```
-  Headers required: InterswitchAuth, Signature (SHA1), Timestamp, Nonce, SignatureMethod, TerminalID
-  Signature = base64(sha1("GET&{url}&{timestamp}&{nonce}&{CLIENT_ID}&{SECRET_KEY}"))
-  ```
-- [ ] `payments/` module — Interswitch Web Checkout collection (uses OAuth):
-  - `initiatePayment(agreementId)` → generates payment URL, redirects client to Interswitch-hosted page
-  - `verifyPayment(transactionRef)` → confirms payment status via transaction query
-- [ ] `POST /webhooks/interswitch` — receives `TRANSACTION.COMPLETED` event:
-  - Verify `X-Interswitch-Signature` using HmacSHA512 against raw JSON body
-  - Return HTTP 200 **immediately** before any other processing (Interswitch retries 5x if no 200)
-  - Then async: mark agreement as `FUNDED` in DB
-- [ ] `disbursement/` service — 4-step flow triggered when `MilestoneApproved` fires:
-
-  ```
-  Step 1: Validate contractor account (legacy auth)
-  GET /api/v1/nameenquiry/banks/accounts/names
-  Headers: InterswitchAuth, Signature, TerminalID, bankCode, accountId
-
-  Step 2: Compute MAC (SHA512) before every transfer:
-  mac = sha512(initiatingAmount + initiatingCurrencyCode + initiatingPaymentMethodCode
-             + terminatingAmount + terminatingCurrencyCode + terminatingPaymentMethodCode
-             + terminatingCountryCode)
-
-  Step 3: Execute disbursement (OAuth Bearer token)
-  POST https://qa.interswitchng.com/quicktellerservice/api/v5/transactions/TransferFunds
-  Body: { transferCode, mac, initiation: {...}, termination: {...}, sender: {...}, beneficiary: {...} }
-
-  Step 4: Store TransactionReference from response → query status if needed
-  ```
-
-### End of Day Checkpoint ✅
-
-- Full flow working: create agreement → pay → confirm milestones → auto-disburse
-- Both Interswitch auth helpers working (OAuth + Legacy)
-- Webhook verified with HmacSHA512 and returning 200 immediately
-- MAC hash computed correctly before every disbursement
-
-&nbsp;
-
-## 🎨 Designer — Frontend Implementation (Next.js)
-
-### Morning (9am – 1pm): Project Setup + Landing Page
-
-- [ ] `npx create-next-app nerave-frontend` — scaffold with Tailwind
-- [ ] Set up design tokens in `tailwind.config.js` — brand colors, fonts
-- [ ] Build landing page from Figma designs:
-  - Hero section with tagline
-  - "How it works" — 3 step visual flow
-  - SDK code snippet block (syntax highlighted)
-  - CTA buttons
-
-### Afternoon (2pm – 7pm): Dashboard + Agreement Flow
-
-- [ ] Build dashboard layout — sidebar + main content
-- [ ] Build agreement creation form — multi-step (details → milestones → payment)
-- [ ] Build milestone card component — status indicators, confirm button
-- [ ] Connect to backend API — agreement creation + payment initiation
-- [ ] Basic auth pages — login + register
-
-### End of Day Checkpoint ✅
-
-- Landing page live on Vercel
-- Dashboard functional with real API calls
-- Agreement creation flow working end to end in UI
-
----
-
-&nbsp;
-
-# 📅 DAY 3 — March 25th: Polish + Deploy
-
-> Goal: Everything is live, demo-able, and judges can test it themselves.
-
-&nbsp;
-
-## 🔷 Joshua — Testing + Contract Verification + Demo Prep
-
-### Morning (9am – 1pm): Hardening
-
-- [ ] Write full Foundry test suite — cover all milestone states and edge cases
-- [ ] Run `forge test -vvv` — all passing
-- [ ] Verify deployed contract on Sepolia Etherscan — judges can inspect it
-- [ ] Stress test event listener — does it handle multiple agreements simultaneously?
-- [ ] Fix any blockchain ↔ backend sync issues
-
-### Afternoon (2pm – 6pm): SDK Docs + Publish + Demo Script
-
-- [ ] Build Developer Portal API Keys Page — add a new Next.js page (`/dashboard/settings`) where developers can copy their auto-generated API key.
-- [ ] Polish SDK README — installation, quickstart, full API reference
-- [ ] Update `package.json` — set name (`nerave-sdk`), version (`0.1.0`), `main`, `types`, `files` fields
-- [ ] Build SDK — `npm run build` — confirm `dist/` output is clean
-- [ ] Create npm account if not already done — `npm login`
-- [ ] Publish to npm — `npm publish --access public`
-- [ ] Verify live on npmjs.com — `npm install nerave-sdk` should work
-- [ ] Update SDK README with real npm install badge + npmjs.com link
-- [ ] Write the demo script — exact steps judges will follow
-- [ ] Prepare Sepolia Etherscan links to show on-chain activity during demo
-- [ ] Final end-to-end test of entire flow
-
-### End of Day Checkpoint ✅
-
-- Contract verified on Etherscan
-- `nerave-sdk` live and installable on npm
-- Demo script rehearsed
-
-&nbsp;
-
-## 🔶 Backend Dev — Deploy + Stabilise
-
-### Morning (9am – 1pm): Deployment
-
-- [ ] Deploy NestJS API to Railway or Render
-- [ ] Set all environment variables — Interswitch sandbox keys, Sepolia RPC, wallet private key, JWT secret
-- [ ] Point frontend to production API URL
-- [ ] Run full flow against production — create agreement → pay → approve → disburse
-
-### Afternoon (2pm – 6pm): Stability + Docs
-
-- [ ] Handle edge cases — failed payments, duplicate webhook events, network errors
-- [ ] Add request validation — `class-validator` on all DTOs
-- [ ] Write basic API documentation — at minimum document the 5 core endpoints
-- [ ] Add test credentials to submission README so judges can log in immediately
-- [ ] Final Postman run through all endpoints
-
-### End of Day Checkpoint ✅
-
-- API live and stable on production URL
-- Test credentials documented
-- All endpoints returning correct responses
-
-&nbsp;
-
-## 🎨 Designer — Polish + Presentation Assets
-
-### Morning (9am – 1pm): UI Polish
-
-- [ ] Responsive design — make sure dashboard works on different screen sizes
-- [ ] Loading states — skeleton loaders, button loading spinners
-- [ ] Empty states — what shows when there are no agreements yet
-- [ ] Success/error toast notifications
-- [ ] Final Vercel deploy — confirm live URL works
-
-### Afternoon (2pm – 6pm): Demo Assets
-
-- [ ] Design a clean project banner / cover image for GitHub README
-- [ ] Create a 1-page pitch slide — problem, solution, tech stack, demo link
-- [ ] Screenshot the working product for the README
-- [ ] Design the SDK npm package README header graphic
-- [ ] Prepare any demo walkthrough visuals judges might need
-
-### End of Day Checkpoint ✅
-
-- Frontend polished and live
-- GitHub README has banner, screenshots, demo link, test credentials
-- Pitch slide ready for Demo Day
-
----
-
-&nbsp;
-
-# 🚀 Submission Checklist
-
-- [ ] GitHub repo is public with commits from all team members
-- [ ] Live frontend URL (Vercel)
-- [ ] Live backend URL (Railway/Render)
-- [ ] Contract address on Sepolia Etherscan
-- [ ] `nerave-sdk` published on npm — `npm install nerave-sdk` works
-- [ ] SDK README with npm badge, installation + quickstart
-- [ ] Test credentials in README
-- [ ] Demo video or walkthrough (optional but recommended)
-
----
-
-# 🏗️ Architecture Summary
+### Layer 3: The Money Rails (Interswitch)
+> When both parties confirm a milestone, the smart contract emits a signal. Our backend catches it and **automatically triggers a bank transfer** through **Interswitch's API** to the contractor's bank account. No manual intervention. No disputes. The money flows when — and only when — both sides agree.
 
 ```
-┌─────────────────┐         ┌──────────────────┐
-│   Nerave SDK    │────────▶│   NestJS API     │
-│  (TypeScript)   │  HTTP   │                  │
-└─────────────────┘         │  ┌────────────┐  │
-                            │  │ agreements │  │
-┌─────────────────┐         │  │ payments   │  │
-│  Next.js Demo   │────────▶│  │ blockchain │  │
-│    Frontend     │  HTTP   │  │ webhooks   │  │
-└─────────────────┘         │  └────────────┘  │
-                            └────────┬─────────┘
-                                     │
-                    ┌────────────────┼────────────────┐
-                    │                │                 │
-             ┌──────▼──────┐  ┌──────▼──────┐  ┌──────▼──────┐
-             │  PostgreSQL  │  │  Interswitch │  │   Sepolia   │
-             │  (Supabase)  │  │   Sandbox    │  │   Testnet   │
-             └─────────────┘  └─────────────┘  └─────────────┘
+Client creates agreement → Smart contract deployed on blockchain
+Client funds agreement  → Money held (via Interswitch collection)
+Both confirm milestone  → Smart contract signals approval
+Backend detects signal  → Interswitch disburses to contractor's bank
+```
+
+**That's it.** Trustless. Automatic. Transparent.
+
+---
+
+## 🚀 Live Demo & Test Credentials
+
+### Demo Application
+> **[🌐 Nerave Demo App](https://nerave-demo.vercel.app)** — _Try the full flow yourself_
+
+### Test Accounts
+
+| Role | Email | Password | What You Can Do |
+|------|-------|----------|----------------|
+| 🏢 **Business Owner** | `demo-owner@nerave.test` | `Demo12345!` | Create agreements, add milestones, fund & confirm |
+| 🔧 **Contractor** | `demo-contractor@nerave.test` | `Demo12345!` | View projects, confirm milestones, receive disbursement |
+
+### Quick Demo Walkthrough (2 minutes)
+
+1. **Open the demo app** → Click **"Login as Business Owner"**
+2. **Create an agreement** → Click "New Agreement", enter `demo-contractor@nerave.test` as the contractor
+3. **Add milestones** → e.g., _"Design Phase: ₦150,000"_ and _"Development: ₦350,000"_
+4. **Fund the agreement** → Click **"Mock Pay"** (simulates Interswitch payment)
+5. **Confirm a milestone** → Expand the agreement, click **"Confirm"** on a milestone
+6. **Switch to Contractor** → Sign out, click **"Login as Contractor"**
+7. **Confirm the same milestone** → When _both sides confirm_, auto-disbursement triggers! 🎉
+8. **Check Etherscan** → Click the contract address link to see it live on the blockchain
+
+### API & SDK Access
+
+| Resource | Value |
+|----------|-------|
+| API Base URL | `https://nerave.onrender.com` |
+| SDK Test API Key | `pk_test_02b687d61e5144ab8a0fd3a05cb3a6de` |
+| NPM Package | `npm install nerave-sdk` |
+| Interswitch Sandbox | `https://sandbox.interswitchng.com` |
+| Test Bank Account | `0014261063` (GTB, Bank Code: `058`) |
+| Interswitch Terminal ID | `3PBL0001` |
+
+---
+
+## 💡 Innovation — Why This Matters
+
+### The Blockchain Angle 🔗
+
+Most payment escrow solutions require you to **trust the platform** — they hold your money, and you hope they release it fairly. That's just replacing one trust problem with another.
+
+Nerave is different. The escrow logic lives **on-chain** in a Solidity smart contract (`PayLockAgreement.sol`). The rules are:
+
+- Only the **client** and **contractor** on the agreement can interact with it
+- Both must call `confirmMilestone()` — one party alone cannot trigger disbursement
+- Once both confirm, the contract emits a `MilestoneApproved` event that **cannot be faked or reversed**
+- The contract is **verified on Etherscan** — anyone can audit the code
+
+**Nobody — not even Nerave — can override the contract.** That's real trust.
+
+### The Interswitch Angle 💳
+
+Smart contracts are powerful, but they don't move Naira. That's where **Interswitch** completes the picture:
+
+1. **Collection** — Clients fund agreements through Interswitch Web Checkout (secure, PCI-compliant payment page)
+2. **Account Validation** — Before disbursement, we validate the contractor's bank account using Interswitch's Name Enquiry API
+3. **Disbursement** — When a milestone is approved on-chain, we automatically transfer funds to the contractor's bank via Interswitch's TransferFunds API
+4. **Webhooks** — We listen for Interswitch's `TRANSACTION.COMPLETED` webhook to confirm payment status
+
+**Blockchain provides the trust. Interswitch provides the rails. Nerave connects them.**
+
+---
+
+## 📦 SDK Quickstart — Ship in 10 Lines
+
+```bash
+npm install nerave-sdk
+```
+
+```typescript
+import { Nerave } from 'nerave-sdk';
+
+const nerave = new Nerave({ apiKey: 'pk_test_your_key_here' });
+
+// Create an agreement — deploys a smart contract!
+const agreement = await nerave.agreements.create({
+  contractorId: 'contractor-user-id',
+  totalAmount: 500000,
+  milestones: [
+    { title: 'Design Phase', amount: 150000 },
+    { title: 'Development', amount: 250000 },
+    { title: 'Deployment', amount: 100000 },
+  ],
+});
+
+// Fund via Interswitch
+const payment = await nerave.payments.initiate(agreement.id);
+// → Returns Interswitch checkout URL for the client to pay
+
+// Confirm milestone (both parties must do this)
+await nerave.milestones.confirm({
+  agreementId: agreement.id,
+  milestoneId: agreement.milestones[0].id,
+});
+// → When both confirm → auto-disburse to contractor's bank!
+```
+
+### Full SDK API
+
+| Method | Description |
+|--------|-------------|
+| `nerave.agreements.create(input)` | Create agreement + deploy smart contract |
+| `nerave.agreements.list()` | List all your agreements |
+| `nerave.agreements.get(id)` | Get agreement details + milestone states |
+| `nerave.milestones.confirm(input)` | Confirm a milestone (as client or contractor) |
+| `nerave.payments.initiate(agreementId)` | Generate Interswitch payment URL |
+| `nerave.payments.verify(transactionRef)` | Verify payment status |
+
+---
+
+## 🏗️ Architecture
+
+```
+                            ┌─────────────────────────────────────────┐
+                            │         Developer's Application         │
+                            │                                         │
+                            │    import { Nerave } from 'nerave-sdk'  │
+                            │    const nerave = new Nerave({...})     │
+                            └────────────────┬────────────────────────┘
+                                             │
+                                        HTTP + API Key
+                                             │
+                ┌────────────────────────────┼────────────────────────────┐
+                │                    Nerave Backend (NestJS)              │
+                │                                                        │
+                │  ┌──────────┐  ┌──────────────┐  ┌──────────────────┐ │
+                │  │   Auth   │  │  Agreements  │  │    Payments      │ │
+                │  │  Module  │  │    Module     │  │     Module       │ │
+                │  │          │  │              │  │                  │ │
+                │  │ • JWT    │  │ • CRUD       │  │ • Collection     │ │
+                │  │ • API    │  │ • Deploy     │  │ • Verification   │ │
+                │  │   Keys   │  │   Contract   │  │ • Disbursement   │ │
+                │  │ • Roles  │  │ • Confirm    │  │ • Webhooks       │ │
+                │  └──────────┘  │   Milestone  │  │ • MAC Hash       │ │
+                │                └──────┬───────┘  └────────┬─────────┘ │
+                │                       │                   │           │
+                │              ┌────────┴───────────────────┘           │
+                │              │    Blockchain Module (Viem)            │
+                │              │    • Deploy contract                   │
+                │              │    • Call confirmMilestone()           │
+                │              │    • Watch MilestoneApproved events    │
+                │              └────────┬───────────────────┬───────────┤
+                └───────────────────────┼───────────────────┼───────────┘
+                                        │                   │
+                     ┌──────────────────┘                   └──────────────┐
+                     ▼                                                      ▼
+         ┌───────────────────────┐                           ┌──────────────────────┐
+         │   Sepolia Testnet     │                           │   Interswitch APIs   │
+         │                       │                           │                      │
+         │  PayLockAgreement.sol │                           │  • OAuth2 Token      │
+         │  • Agreement struct   │                           │  • Web Checkout      │
+         │  • Milestone struct   │                           │  • Name Enquiry      │
+         │  • confirmMilestone() │                           │  • TransferFunds     │
+         │  • MilestoneApproved  │                           │  • Webhooks          │
+         │    event              │                           │                      │
+         └───────────────────────┘                           └──────────────────────┘
+                                                                       │
+                                                                       ▼
+                                                             ┌──────────────────┐
+                                                             │  Contractor's    │
+                                                             │  Bank Account    │
+                                                             │  (GTB/Any Bank)  │
+                                                             └──────────────────┘
+```
+
+### Data Flow: What Happens When a Milestone is Approved
+
+```
+1. Client calls  → nerave.milestones.confirm({ agreementId, milestoneId })
+2. Contractor    → nerave.milestones.confirm({ agreementId, milestoneId })
+3. Backend       → Calls smart contract confirmMilestone() on Sepolia
+4. Smart Contract→ Both confirmed? Emit MilestoneApproved(milestoneId, amount)
+5. Viem Listener → Catches the event on-chain
+6. Backend       → Validates contractor bank (Interswitch Name Enquiry)
+7. Backend       → Computes MAC hash (SHA-512)
+8. Backend       → Calls Interswitch TransferFunds API
+9. Interswitch   → Disburses ₦ to contractor's bank account
+10. Backend      → Marks milestone as disbursed in database
 ```
 
 ---
 
-_Built for the Interswitch x Enyata Hackathon 2026 · March 23–26_
+## 🛠️ Tech Stack
+
+| Layer | Technology | Why |
+|-------|-----------|-----|
+| **Smart Contract** | Solidity 0.8.20 + Foundry | Battle-tested EVM toolchain, fast compilation, built-in testing |
+| **Backend** | NestJS + TypeScript | Modular architecture, dependency injection, enterprise-grade structure |
+| **Database** | PostgreSQL (Supabase) | Reliable, free tier, real-time capabilities |
+| **ORM** | Prisma | Type-safe database queries, automatic migrations |
+| **Blockchain Client** | Viem | Modern, lightweight alternative to ethers.js — better TypeScript support |
+| **SDK** | TypeScript + Axios | Full type safety, tree-shakeable, works in Node.js and browsers |
+| **Demo Frontend** | React + Vite | Fast dev server, optimal bundling, TypeScript-first |
+| **Payment Rails** | Interswitch APIs | Nigeria's leading payment infrastructure — trusted by banks |
+| **Testnet** | Sepolia (Ethereum) | Official Ethereum testnet — reliable, well-supported |
+| **Deployment** | Render (API) + Vercel (Frontend) | Zero-config deployment, automatic HTTPS |
+
+---
+
+## 💳 Interswitch APIs Used
+
+### 1. OAuth 2.0 Authentication
+```
+POST https://sandbox.interswitchng.com/passport/oauth/token
+Authorization: Basic Base64(CLIENT_ID:SECRET_KEY)
+Body: grant_type=client_credentials
+→ Returns access_token for subsequent API calls
+```
+**Used for:** Payment collection and disbursement API authentication.
+
+### 2. Web Checkout (Payment Collection)
+```
+POST https://sandbox.interswitchng.com/collections/api/v1/purchases
+Authorization: Bearer {access_token}
+Body: { merchantCode, amount, transactionReference, customerEmail, redirectUrl }
+→ Returns redirectUrl for customer payment page
+```
+**Used for:** Client funds the agreement through Interswitch's secure, PCI-compliant hosted payment page.
+
+### 3. Transaction Verification
+```
+GET https://sandbox.interswitchng.com/collections/api/v1/purchases/{transactionRef}
+Authorization: Bearer {access_token}
+→ Returns { responseCode: '00' } on success
+```
+**Used for:** Confirming payment was successful before marking agreement as FUNDED.
+
+### 4. Name Enquiry (Account Validation) — _Legacy Auth_
+```
+GET https://qa.interswitchng.com/api/v1/nameenquiry/banks/accounts/names
+Headers: InterswitchAuth, Signature, Timestamp, Nonce, TerminalID
+Signature: Base64(SHA1("GET&{url}&{timestamp}&{nonce}&{CLIENT_ID}&{SECRET_KEY}"))
+→ Returns { accountName: "..." } — validates the bank account exists
+```
+**Used for:** Validating the contractor's bank account before disbursing funds.
+
+### 5. TransferFunds (Disbursement) — _OAuth Bearer_
+```
+POST https://qa.interswitchng.com/quicktellerservice/api/v5/transactions/TransferFunds
+Authorization: Bearer {access_token}
+Body: { mac, transferCode, beneficiaryBankCode, beneficiaryAccountNumber, amount, ... }
+MAC: SHA-512(initiatingAmount + currencyCodes + paymentMethods + countryCode)
+→ Returns { transactionReference } — funds sent to contractor's bank
+```
+**Used for:** Automatically disbursing milestone payment to the contractor's bank account when both parties confirm.
+
+### 6. Webhook Verification
+```
+POST /webhooks/interswitch (our endpoint)
+Verify: HmacSHA512(rawJsonBody, WEBHOOK_SECRET) === X-Interswitch-Signature header
+→ Return HTTP 200 immediately (Interswitch retries 5x if no 200)
+→ Then async: update agreement status to FUNDED
+```
+**Used for:** Receiving real-time payment confirmation from Interswitch.
+
+---
+
+## ⛓️ Smart Contract — Verified on Etherscan
+
+**Contract:** [`PayLockAgreement.sol`](./nerave-contracts/src/PayLockAgreement.sol)
+
+> 🔗 **[View on Sepolia Etherscan](https://sepolia.etherscan.io)** — _Each agreement deploys a new contract instance_
+
+### Key Functions
+
+```solidity
+// Only client/contractor can interact
+modifier onlyParties() {
+    require(msg.sender == agreement.client || msg.sender == agreement.contractor);
+}
+
+// Both must confirm before disbursement triggers
+function confirmMilestone(uint256 milestoneId) external onlyParties {
+    if (msg.sender == agreement.client) m.clientConfirmed = true;
+    if (msg.sender == agreement.contractor) m.contractorConfirmed = true;
+
+    if (m.clientConfirmed && m.contractorConfirmed && !m.disbursed) {
+        m.disbursed = true;
+        emit MilestoneApproved(milestoneId, m.amount); // ← triggers Interswitch disbursement
+    }
+}
+```
+
+### Why This Matters
+- The contract is **immutable** — once deployed, nobody can change the rules
+- Both parties must agree — **no single party can steal funds**
+- The `MilestoneApproved` event is **publicly verifiable** on the blockchain
+- Any auditor, judge, or third party can inspect the contract on Etherscan
+
+---
+
+## 📁 Repository Structure
+
+```
+nerave/
+├── nerave-contracts/          # Solidity smart contracts (Foundry)
+│   └── src/
+│       └── PayLockAgreement.sol
+│
+├── nerave-backend/            # NestJS API server
+│   └── src/
+│       ├── auth/              # JWT + API key authentication
+│       ├── agreement/         # Agreement CRUD + milestone confirmation
+│       ├── blockchain/        # Viem client — deploy, confirm, listen
+│       ├── payment/           # Interswitch collection + disbursement
+│       │   ├── helpers/       # OAuth + Legacy auth + MAC hash
+│       │   └── webhooks/      # Interswitch webhook handler
+│       └── prisma/            # Database service
+│
+├── nerave-sdk/                # TypeScript SDK (published on npm)
+│   └── src/
+│       ├── nerave.ts          # Main client class
+│       ├── resources/         # agreements, milestones, payments
+│       ├── types.ts           # Full TypeScript type exports
+│       └── http.ts            # Axios HTTP client with interceptors
+│
+├── nerave-demo/               # React + Vite demo application
+│   └── src/
+│       ├── pages/             # Login, Business Dashboard, Client Portal
+│       ├── components/        # Agreement cards, SDK panels, flow diagrams
+│       ├── context/           # Auth state management
+│       └── hooks/             # useNerave SDK hook
+│
+└── README.md                  # ← You are here
+```
+
+---
+
+## 👥 Team
+
+| Name | Role | Contributions |
+|------|------|--------------|
+| **Joshua** | Smart Contracts + Blockchain | Solidity contract, Foundry tests, Viem integration, SDK architecture, blockchain event listeners, auto-disbursement pipeline |
+| **Backend Dev** | API + Payments | NestJS modules, Prisma schema, Interswitch OAuth + Legacy auth, disbursement flow, webhook handling, MAC hash computation |
+| **Designer** | Frontend + Brand | Brand identity, UI/UX design, React frontend, demo application, responsive layouts |
+
+---
+
+## 🏁 How to Run Locally
+
+### Prerequisites
+- Node.js 18+
+- PostgreSQL database (or use Supabase free tier)
+- Interswitch sandbox credentials (provided in `.env`)
+
+### Backend
+```bash
+cd nerave-backend
+npm install
+npx prisma migrate dev
+npm run start:dev
+# → API running on http://localhost:5000
+```
+
+### SDK (Development)
+```bash
+cd nerave-sdk
+npm install
+npm run build
+# → Compiled to dist/
+```
+
+### Demo App
+```bash
+cd nerave-demo
+npm install
+npm run dev
+# → Open http://localhost:5173
+```
+
+---
+
+## 🔑 Environment Variables
+
+```env
+# Interswitch Sandbox
+INTERSWITCH_CLIENT_ID=IKIA732217EE0092C23AC6B6D3CC62C29D9747E9B0A6
+INTERSWITCH_SECRET_KEY=5qaZhlOt8msVqXx
+INTERSWITCH_TERMINAL_ID=3PBL0001
+INTERSWITCH_BASE_URL=https://sandbox.interswitchng.com
+INTERSWITCH_TRANSFER_URL=https://qa.interswitchng.com
+
+# Blockchain (Sepolia)
+SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/your-key
+WALLET_PRIVATE_KEY=0x...
+
+# Database
+DATABASE_URL=postgresql://...
+
+# Auth
+JWT_SECRET=your-secret
+```
+
+---
+
+<p align="center">
+  <br />
+  <strong>Nerave</strong> — Because trust shouldn't be a luxury.<br />
+  <em>Built with 💚 for the Interswitch × Enyata Hackathon 2026</em><br />
+  <sub>March 23–26, 2026</sub>
+</p>

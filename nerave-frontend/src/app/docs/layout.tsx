@@ -95,7 +95,14 @@ export default function DocsLayout({
       <main className="flex-1 min-w-0">
         <div className="h-16 flex md:hidden items-center px-6 border-b border-gray-200 bg-white sticky top-0 z-20">
           <Link href="/" className="flex items-center gap-2 group">
-            <Sparkles className="w-5 h-5 text-[#7c3aed]" />
+            <div className="w-8 h-8 flex items-center justify-center">
+              <Image
+                src="/nerave-logo.svg"
+                alt="Nerave Logo"
+                width={32}
+                height={32}
+              />
+            </div>
             <span className="font-semibold tracking-tight text-gray-900">
               Nerave Docs
             </span>
