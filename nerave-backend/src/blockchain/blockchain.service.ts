@@ -125,14 +125,14 @@ export class BlockchainService implements OnModuleInit {
     this.account = privateKeyToAccount(privateKey as `0x${string}`);
 
     this.publicClient = createPublicClient({
-      chain: sepolia,
-      transport: http(this.configService.get<string>('RPC_URL') || undefined),
+      chain: sepolia, // Sepolia testnet
+      transport: http(rpcUrl || undefined), // Uses configured RPC URL when available.
     });
 
     this.walletClient = createWalletClient({
       account: this.account,
       chain: sepolia,
-      transport: http(this.configService.get<string>('RPC_URL') || undefined),
+      transport: http(rpcUrl || undefined),
     });
   }
 
@@ -227,6 +227,11 @@ export class BlockchainService implements OnModuleInit {
       amount: string,
     ) => Promise<void> | void,
   ) {
+    
+    if (contractAddress.toLowerCase() === ZERO_ADDRESS) {
+      this.logger.log('[MOCK] Skipping event listener for zero-address contract');
+      return;
+    }
     this.logger.log(
       `Listening for MilestoneApproved events on ${contractAddress}`,
     );
