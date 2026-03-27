@@ -11,7 +11,7 @@ export class HttpClient {
 
   constructor(config: HttpClientConfig) {
     this.client = axios.create({
-      baseURL: config.baseUrl || 'http://localhost:5000',
+      baseURL: config.baseUrl || 'https://nerave.onrender.com',
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': config.apiKey,

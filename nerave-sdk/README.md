@@ -13,29 +13,29 @@ npm install nerave-sdk
 ## Quickstart
 
 ```typescript
-import { Nerave } from 'nerave-sdk';
+import { Nerave } from "nerave-sdk";
 
 // 1. Initialize the client
 const nerave = new Nerave({
-  apiKey: 'pk_test_your_api_key_here',
+  apiKey: "pk_test_your_api_key_here",
   // baseUrl: 'http://localhost:3000' // Uncomment to point to a local backend
 });
 
 // 2. Create a new agreement
 const agreement = await nerave.agreements.create({
-  contractorId: 'user_123',
+  contractorId: "user_123",
   totalAmount: 1000,
   milestones: [
-    { title: 'Design Phase', amount: 300 },
-    { title: 'Development Phase', amount: 700 }
-  ]
+    { title: "Design Phase", amount: 300 },
+    { title: "Development Phase", amount: 700 },
+  ],
 });
 
 // 3. Confirm a milestone
 await nerave.milestones.confirm({
   agreementId: agreement.data.id,
   milestoneId: 0,
-  role: 'CLIENT' // Both CLIENT and CONTRACTOR must confirm
+  role: "CLIENT", // Both CLIENT and CONTRACTOR must confirm
 });
 
 // 4. Check agreement state
@@ -52,12 +52,12 @@ NERAVE_API_KEY=pk_test_your_api_key_here
 ```
 
 ```typescript
-import { Nerave } from 'nerave-sdk';
-import 'dotenv/config';
+import { Nerave } from "nerave-sdk";
+import "dotenv/config";
 
 const nerave = new Nerave({
   // Reads process.env.NERAVE_API_KEY
-  baseUrl: 'http://localhost:5000',
+  baseUrl: "https://nerave.onrender.com",
 });
 ```
 
@@ -65,10 +65,11 @@ You can also use a custom env var name:
 
 ```typescript
 const nerave = new Nerave({
-  apiKeyEnvVar: 'MY_CUSTOM_NERAVE_KEY',
-  baseUrl: 'http://localhost:5000',
+  apiKeyEnvVar: "MY_CUSTOM_NERAVE_KEY",
+  baseUrl: "https://nerave.onrender.com",
 });
 ```
 
 ## TypeScript Types
+
 The SDK exports full typescript types defining interfaces for `CreateAgreementParams`, `ConfirmMilestoneParams`, `AgreementState`, etc.

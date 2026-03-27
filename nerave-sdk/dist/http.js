@@ -8,7 +8,7 @@ const axios_1 = __importDefault(require("axios"));
 class HttpClient {
     constructor(config) {
         this.client = axios_1.default.create({
-            baseURL: config.baseUrl || 'http://localhost:5000',
+            baseURL: config.baseUrl || 'https://nerave.onrender.com',
             headers: {
                 'Content-Type': 'application/json',
                 'x-api-key': config.apiKey,
