@@ -65,12 +65,12 @@ export function Hero() {
               Start Building
               <ArrowUpRight className="w-4 h-4" />
             </Link>
-            <a
-              href="#docs"
+            <Link
+              href="/docs"
               className="px-8 py-4 bg-white text-gray-900 border border-gray-200 rounded-lg font-medium hover:bg-gray-50 transition-colors shadow-sm"
             >
               View Documentation
-            </a>
+            </Link>
           </motion.div>
 
           <motion.div

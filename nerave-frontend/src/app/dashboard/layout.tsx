@@ -105,12 +105,12 @@ export default function DashboardLayout({
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#f7f6f6] noise-texture relative">
         <div className="h-16 flex items-center justify-end px-8 border-b border-gray-200/50 bg-white/50 backdrop-blur-md z-10 sticky top-0">
           <div className="flex items-center gap-4">
-            <a
-              href="#docs"
+            <Link
+              href="/docs"
               className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
             >
               Documentation
-            </a>
+            </Link>
             <div className="w-8 h-8 rounded-full bg-[#f3e8ff] flex items-center justify-center text-[#7c3aed] font-medium border border-[#e9d5ff]">
               U
             </div>
