@@ -1,30 +1,48 @@
 "use client";
 
 import Link from "next/link";
-import { Sparkles, Book, Code2, ShieldAlert, Cpu } from "lucide-react";
+import {
+  Sparkles,
+  Book,
+  Code2,
+  ShieldAlert,
+  Cpu,
+  Home,
+  LayoutDashboard,
+} from "lucide-react";
 
-export default function DocsLayout({ children }: { children: React.ReactNode }) {
+export default function DocsLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const sections = [
+    {
+      title: "Navigation",
+      links: [
+        { name: "Home", href: "/", icon: Home },
+        { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      ],
+    },
     {
       title: "Getting Started",
       links: [
         { name: "Introduction", href: "#introduction", icon: Book },
         { name: "Installation", href: "#installation", icon: Code2 },
         { name: "Authentication", href: "#authentication", icon: ShieldAlert },
-      ]
+      ],
     },
     {
       title: "Core Concepts",
       links: [
         { name: "Agreements", href: "#agreements", icon: Cpu },
         { name: "Milestones", href: "#milestones", icon: Cpu },
-      ]
-    }
+      ],
+    },
   ];
 
   return (
     <div className="flex min-h-screen bg-white text-gray-900 font-sans selection:bg-[#7c3aed]/20">
-      
       {/* Sidebar Navigation */}
       <aside className="hidden md:flex flex-col w-64 border-r border-gray-200 bg-gray-50/50 sticky top-0 h-screen overflow-y-auto">
         <div className="h-16 flex items-center px-6 border-b border-gray-200/50 bg-white">
@@ -32,7 +50,9 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
             <div className="w-8 h-8 rounded-lg bg-white shadow-sm border border-gray-100 flex items-center justify-center group-hover:border-[#7c3aed]/50 transition-colors">
               <Sparkles className="w-4 h-4 text-[#7c3aed]" />
             </div>
-            <span className="font-semibold tracking-tight text-gray-900">Nerave Docs</span>
+            <span className="font-semibold tracking-tight text-gray-900">
+              Nerave Docs
+            </span>
           </Link>
         </div>
 
@@ -43,17 +63,22 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
                 {section.title}
               </h4>
               <ul className="space-y-1">
-                {section.links.map((link) => (
-                  <li key={link.name}>
-                    <a 
-                      href={link.href}
-                      className="flex items-center gap-3 px-2 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                      <link.icon className="w-4 h-4 text-gray-400" />
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
+                {section.links.map((link) => {
+                  const isInternalRoute = link.href.startsWith("/");
+                  const LinkComponent = isInternalRoute ? Link : "a";
+
+                  return (
+                    <li key={link.name}>
+                      <LinkComponent
+                        href={link.href}
+                        className="flex items-center gap-3 px-2 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                      >
+                        <link.icon className="w-4 h-4 text-gray-400" />
+                        {link.name}
+                      </LinkComponent>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
@@ -65,13 +90,13 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
         <div className="h-16 flex md:hidden items-center px-6 border-b border-gray-200 bg-white sticky top-0 z-20">
           <Link href="/" className="flex items-center gap-2 group">
             <Sparkles className="w-5 h-5 text-[#7c3aed]" />
-            <span className="font-semibold tracking-tight text-gray-900">Nerave Docs</span>
+            <span className="font-semibold tracking-tight text-gray-900">
+              Nerave Docs
+            </span>
           </Link>
         </div>
-        
-        <div className="max-w-4xl mx-auto px-6 py-12 lg:px-12">
-          {children}
-        </div>
+
+        <div className="max-w-4xl mx-auto px-6 py-12 lg:px-12">{children}</div>
       </main>
     </div>
   );
